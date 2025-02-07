@@ -32,24 +32,19 @@ def analysis():
 
 @app.route('/suggestion',methods=["GET","POST"])
 def suggestion():
-
+    generated_text = None  # 存储 GPT 生成的文本
+    user_prompt = ""
     if request.method == "POST":
         user_prompt = request.form.get('user_prompt', '')
         if not user_prompt:
             return render_template('suggestion.html', message="Please enter a requirment.")
         
-
-    return render_template('index.html')
-
-
-
+        generated_text = chat_with_gpt(user_prompt)
+    
+    return render_template('suggestion.html', user_prompt=user_prompt, generated_text=generated_text)
 
 
 
-    user_prompt = request.get_data('prompt')
-    prompt = prepare_prompt(user_history,user_prompt)
-
-    return render_template('suggestion.html')
 
 
 if __name__ == '__main__':

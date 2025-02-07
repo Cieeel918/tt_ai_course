@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Suggestion</title>
+</head>
+<body>
+    <h1>AI Suggestion</h1>
+
+    <form method="POST">
+        <label for="user_prompt">请输入你的需求：</label><br>
+        <textarea id="user_prompt" name="user_prompt" rows="4" cols="50">{{ user_prompt or '' }}</textarea><br><br>
+        <input type="submit" value="提交">
+    </form>
+
+    {% if message %}
+        <p style="color: red;">{{ message }}</p>
+    {% endif %}
+
+    {% if generated_text %}
+        <h2>AI 生成的建议：</h2>
+        <p>{{ generated_text }}</p>
+    {% endif %}
+</body>
+</html>
