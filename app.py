@@ -33,16 +33,16 @@ def analysis():
 @app.route('/suggestion',methods=["GET","POST"])
 def suggestion():
     generated_text = None
-    user_prompt = ""
+    a = ""
     if request.method == "POST":
-        user_prompt = request.form.get('user_prompt', '')
-        if not user_prompt:
+        a = request.form.get('user_prompt', '')
+        if not a:
             return render_template('suggestion.html', message="Please enter a requirment.")
         
-        prompt = prepare_prompt(user_prompt,user_history)
+        prompt = prepare_prompt(a,user_history)
         generated_text = chat_with_gpt(prompt)
     
-    return render_template('suggestion.html', user_prompt=user_prompt, generated_text=generated_text)
+    return render_template('suggestion.html', user_prompt=a, generated_text=generated_text)
 
 
 
