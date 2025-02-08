@@ -6,8 +6,8 @@ from openai import OpenAI
 
 
 def prepare_prompt(user_prompt,history_info):
+    history
     
-    pass
     
     return prompt
 

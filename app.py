@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import openai
+from functions import *
 
 app = Flask(__name__)
 
