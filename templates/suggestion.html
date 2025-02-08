@@ -22,5 +22,12 @@
         <h2>AI 生成的建议：</h2>
         <p>{{ generated_text }}</p>
     {% endif %}
+
+    <!-- 添加返回按钮 -->
+    <br><br>
+    <a href="{{ url_for('home') }}">
+        <button type="button">返回主页</button>
+    </a>
 </body>
 </html>
+

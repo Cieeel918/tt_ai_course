@@ -9,7 +9,9 @@ def prepare_prompt(user_prompt,history_info):
     
     pass
     
-    return 
+    return prompt
+
+
 
 
 def chat_with_gpt(user_input):
