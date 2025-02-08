@@ -9,9 +9,9 @@
     <h1>AI Suggestion</h1>
 
     <form method="POST">
-        <label for="user_prompt">请输入你的需求：</label><br>
+        <label for="user_prompt">请输入你的攒钱目标和待买事项：</label><br>
         <textarea id="user_prompt" name="user_prompt" rows="4" cols="50">{{ user_prompt or '' }}</textarea><br><br>
-        <input type="submit" value="提交">
+        <input type="submit" value="Submit">
     </form>
 
     {% if message %}
