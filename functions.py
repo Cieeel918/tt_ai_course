@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from openai import OpenAI
 from datetime import datetime
-
-
+from dash import Dash, html, dash_table, dcc, callback, Output, Input
+import plotly.express as px
 
 def prepare_prompt(user_prompt,history_info):
     '''收入多少，各类型支出多少，'''
@@ -73,3 +73,18 @@ def chat_with_gpt(user_input):
         print("error")
 
 
+
+def load_data():
+    df = pd.read_csv('user_annual_bill_data.csv')
+    df['timestamp'] = pd.to_datetime(df['timestamp'])
+    df['month'] = df['timestamp'].dt.month
+    return df
+
+def get_monthly_summary(df):
+    income = df[df.income_or_spending == 1].groupby('month').amount.sum().rename('income')
+    spending = df[df.income_or_spending == 0].groupby('month').amount.sum().rename('spending')
+    return pd.concat([income, spending], axis=1).reset_index().fillna(0)
+
+def get_month_type_data(df, month, category):
+    filtered = df[(df.month == month) & (df.income_or_spending == category)]
+    return filtered.groupby('type', as_index=False).amount.sum()
