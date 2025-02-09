@@ -9,7 +9,7 @@ import plotly.express as px
 from functions import load_data, get_monthly_summary, get_month_type_data,prepare_prompt,chat_with_gpt
 
 app = Flask(__name__)
-dashapp = Dash()
+dashapp = Dash(__name__, server=app, url_base_pathname="/analysis/")
 
 user_history = pd.DataFrame()
 
@@ -24,63 +24,62 @@ def home():
 
     return render_template('home.html')
 
-@app.route('/analysis',methods=["GET","POST"])
-def analysis():
-    df = load_data()
-    monthly_summary = get_monthly_summary(df)
 
-    dashapp.layout = html.Div([
-        html.H1("Annual Bill Analysis", style={'textAlign': 'center'}),
-        
-        # 图表1：静态月度柱状图
-        dcc.Graph(
-            id='monthly-bar',
-            figure=px.bar(
-                monthly_summary,
-                x='month',
-                y=['income', 'spending'],
-                title="Monthly Income vs Spending",
-                labels={'value': 'Amount', 'variable': 'Category'},
-                barmode='group'
-            )
+
+df = load_data()
+monthly_summary = get_monthly_summary(df)
+
+dashapp.layout = html.Div([
+    html.H1("Annual Bill Analysis", style={'textAlign': 'center'}),
+    
+    # 图表1：静态月度柱状图
+    dcc.Graph(
+        id='monthly-bar',
+        figure=px.bar(
+            monthly_summary,
+            x='month',
+            y=['income', 'spending'],
+            title="Monthly Income vs Spending",
+            labels={'value': 'Amount', 'variable': 'Category'},
+            barmode='group'
+        )
+    ),
+    
+    html.Hr(),
+    
+    # 图表2：动态饼图
+    html.Div([
+        dcc.Dropdown(
+            id='month-selector',
+            options=[{'label': f'Month {m}', 'value': m} for m in range(1, 13)],
+            value=1,
+            style={'width': '200px'}
         ),
-        
-        html.Hr(),
-        
-        # 图表2：动态饼图
-        html.Div([
-            dcc.Dropdown(
-                id='month-selector',
-                options=[{'label': f'Month {m}', 'value': m} for m in range(1, 13)],
-                value=1,
-                style={'width': '200px'}
-            ),
-            dcc.RadioItems(
-                id='category-selector',
-                options=[
-                    {'label': 'Income', 'value': 1},
-                    {'label': 'Spending', 'value': 0}
-                ],
-                value=0,
-                inline=True
-            ),
-            dcc.Graph(id='type-pie')
-        ])
+        dcc.RadioItems(
+            id='category-selector',
+            options=[
+                {'label': 'Income', 'value': 1},
+                {'label': 'Spending', 'value': 0}
+            ],
+            value=0,
+            inline=True
+        ),
+        dcc.Graph(id='type-pie')
     ])
+])
 
-    @dashapp.callback(
-        Output('type-pie', 'figure'),
-        [Input('month-selector', 'value'),
-        Input('category-selector', 'value')]
-    )
-    def update_pie(month, category):
-        data = get_month_type_data(df, month, category)
-        title = f'{"Income" if category else "Spending"} Types - Month {month}'
-        return px.pie(data, values='amount', names='type', title=title)
+@dashapp.callback(
+    Output('type-pie', 'figure'),
+    [Input('month-selector', 'value'),
+    Input('category-selector', 'value')]
+)
+def update_pie(month, category):
+    data = get_month_type_data(df, month, category)
+    title = f'{"Income" if category else "Spending"} Types - Month {month}'
+    return px.pie(data, values='amount', names='type', title=title)
 
-    if __name__ == '__main__':
-        dashapp.run_server(debug=True)  
-    return render_template('analysis.html')
+    
+    
 
 
 @app.route('/suggestion',methods=["GET","POST"])
