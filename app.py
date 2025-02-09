@@ -4,11 +4,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import openai
+from datetime import datetime
 
 app = Flask(__name__)
 
 
-user_history = pd.DataFrame()
+user_history = pd.DataFrame(columns=['timestamp','income_or_spending', 'type', 'amount'])
 
 
 @app.route('/',methods=["GET","POST"])
@@ -18,14 +19,29 @@ def home():
     允许多次输入信息
     允许跳转另外两个页面
     """
+    global user_history
+    if request.method == "POST":
+    
+        income_or_spending = int(request.form['income_or_spending'])
+        transaction_type = request.form['type']
+        amount = float(request.form['amount'])
+        timestamp = datetime.now().strftime('%Y/%m/%d')
+
+        
+        new_entry = pd.DataFrame({
+            'timestamp': [timestamp],
+            'income_or_spending': [income_or_spending],
+            'type': [transaction_type],
+            'amount': [amount]
+        })
+
+        user_history = pd.concat([user_history,new_entry],ignore_index = True)
+        #print(user_history)
 
     return render_template('home.html')
 
 @app.route('/analysis')
 def analysis():
-
-
-
 
     return render_template('analysis.html')
 
