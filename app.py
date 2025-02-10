@@ -9,7 +9,7 @@ import plotly.express as px
 from functions import load_data, get_monthly_summary, get_month_type_data,prepare_prompt,chat_with_gpt
 
 app = Flask(__name__)
-dashapp = Dash(__name__, server=app, url_base_pathname="/analysis/")
+dashapp = Dash(__name__, server=app, url_base_pathname="/analysis/",suppress_callback_exceptions=True)
 
 user_history = pd.DataFrame()
 
