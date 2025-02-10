@@ -2,13 +2,42 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from openai import OpenAI
-
-
+from datetime import datetime
+from dash import Dash, html, dash_table, dcc, callback, Output, Input
+import plotly.express as px
 
 def prepare_prompt(user_prompt,history_info):
-    history
+    '''收入多少，各类型支出多少，'''
+    df=pd.read_csv(history_info)
+    df['timestamp'] = df['timestamp'].apply(lambda x: datetime.strptime(x, "%Y-%m-%d"))
+    df["month"]=df["timestamp"].apply(lambda x:x.month)
+    df_spend = df.groupby(["month","income_or_spending"],as_index=False).agg({"amount":"sum"}).query("""income_or_spending==0""")
+    df_income= df.groupby(["month","income_or_spending"],as_index=False).agg({"amount":"sum"}).query("""income_or_spending==1""")
     
+    text_all=""  #每月支出和收入
+    for i in range(df_income.shape[0]):
+        income=df_income.iloc[i,:]
+        spend=df_spend.iloc[i,:]
+        text_unit=f"In month {i+1}, the spending is {spend[-1]} and the income is {income[-1]}. "
+        text_all += text_unit
     
+    df_income_type = df.groupby(["income_or_spending","type"],as_index=False).agg({"amount":"sum"}).query("""income_or_spending==1""")
+    df_spend_type = df.groupby(["income_or_spending","type"],as_index=False).agg({"amount":"sum"}).query("""income_or_spending==0""")
+
+    income_type_info='' #不同收入类型
+    for i in range(df_income_type.shape[0]):
+        info=df_income_type.iloc[i,:]
+        type=f'The income type is {info[-2]}, the amount is {info[-1]}.'
+        income_type_info+=type
+
+    spend_type_info='' #不同支出类型
+    for i in range(df_spend_type.shape[0]):
+        info=df_spend_type.iloc[i,:]
+        type=f'The spending type is {info[-2]}, the amount is {info[-1]}.'
+        spend_type_info+=type
+
+    
+    prompt = "here is my monthly income and spending information:" + "\n" + text_all + "\n" + "here is my income type information" + income_type_info + "here is my spend type information" + spend_type_info
     return prompt
 
 
@@ -44,3 +73,18 @@ def chat_with_gpt(user_input):
         print("error")
 
 
+
+def load_data():
+    df = pd.read_csv('user_annual_bill_data.csv')
+    df['timestamp'] = pd.to_datetime(df['timestamp'])
+    df['month'] = df['timestamp'].dt.month
+    return df
+
+def get_monthly_summary(df):
+    income = df[df.income_or_spending == 1].groupby('month').amount.sum().rename('income')
+    spending = df[df.income_or_spending == 0].groupby('month').amount.sum().rename('spending')
+    return pd.concat([income, spending], axis=1).reset_index().fillna(0)
+
+def get_month_type_data(df, month, category):
+    filtered = df[(df.month == month) & (df.income_or_spending == category)]
+    return filtered.groupby('type', as_index=False).amount.sum()
