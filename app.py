@@ -10,7 +10,7 @@ from functions import load_data, get_monthly_summary, get_month_type_data,prepar
 from datetime import datetime
 
 app = Flask(__name__)
-dashapp = Dash(__name__, server=app, url_base_pathname="/analysis/",suppress_callback_exceptions=True)
+dashapp = Dash(__name__, server=app, url_base_pathname="/analysis/", suppress_callback_exceptions=True)
 
 user_history = pd.DataFrame(columns=['timestamp','income_or_spending', 'type', 'amount'])
 
@@ -42,8 +42,6 @@ def home():
         #print(user_history)
 
     return render_template('home.html')
-
-
 
 df = load_data()
 monthly_summary = get_monthly_summary(df)
@@ -97,8 +95,9 @@ def update_pie(month, category):
     title = f'{"Income" if category else "Spending"} Types - Month {month}'
     return px.pie(data, values='amount', names='type', title=title)
 
-    
-    
+@app.route('/analysis/',methods=["GET","POST"])
+def analysis():
+    return render_template('analysis.html')
 
 
 @app.route('/suggestion',methods=["GET","POST"])
@@ -120,4 +119,5 @@ def suggestion():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
+
